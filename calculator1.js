@@ -170,7 +170,7 @@ async function fetchPricesAndShow() {
     SOL: "solana",
     POL: "polygon-ecosystem-token",
     RLT: "manual_rlt", // CoinGecko’da yok
-    RST: null
+    RST: "manual_rst",
   };
 
   const validIds = coins.map(c => idMap[c]).filter(id => id !== null);
@@ -183,6 +183,9 @@ async function fetchPricesAndShow() {
 // Manuel fiyatlar ekle
   if (coins.includes("RLT")) {
     prices["manual_rlt"] = { usd: 1.0 };
+  }
+	if (coins.includes("RST")) {
+    prices["manual_rst"] = { usd: 0.011 };
   }
   // yeni tablo oluştur
   let html = `<h3>USD Karşılığı</h3>
@@ -222,3 +225,4 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("parseBtn").addEventListener("click", parseData);
   document.getElementById("calcBtn").addEventListener("click", calculateRewards);
 });
+
