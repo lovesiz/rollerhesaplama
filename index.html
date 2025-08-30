@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <title>Coin Hesaplama Sistemi</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="left">
+      <h2>Veri Girişi</h2>
+      <textarea id="inputData" placeholder='Örnek format:
+RLT
+2.211 Zh/s
+
+rst
+1.333 Zh/s
+
+xrp
+2.555 Zh/s
+'></textarea>
+
+      <label for="userPower"><strong>Kendi Gücün (birim: senin girdin)</strong></label>
+      <input id="userPower" placeholder="Örn: 5.0" />
+
+      <div class="buttons">
+        <button id="parseBtn">Tabloya Dönüştür</button>
+        <button id="calcBtn">Hesapla</button>
+      </div>
+	<div class="resim"><img src="asd.png" alt=""></div>
+      <p class="note">Hesaplama için öncelikle resimdeki gibi tüm coinleri kopyalayıp Veri Girişi kısmına yapıştırıp Tabloya Dönüştür Butonuna tıklayın. Daha sonra Kendi Gücünüzü yazarak Hesapla Butonuna Tıklayın.</p>
+    </div>
+
+    <div class="right">
+      <h2>Kazanç Tablosu</h2>
+      <table id="resultTable">
+        <thead>
+          <tr>
+            <th>Coin</th>
+            <th>Toplam Güç (ölçeklenmiş)</th>
+            <th>Kullanılan Blok Ödülü (lig→coin)</th>
+            <th>Senin Ödülün (blok başı)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+<!-- USD karşılığı tablosu buraya yazdırılacak -->
+      <div id="usdTable"></div>
+    </div>
+  </div>
+
+  <!-- Önce blok ödüllerini yükle -->
+  <script src="blockRewards.js"></script>
+
+  <!-- Sonra hesaplama/parsing kodu -->
+  <script src="calculator1.js"></script>
+</body>
+</html>
