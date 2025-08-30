@@ -6,6 +6,9 @@ body {
   padding:20px;
   color:#222;
 }
+#frame{
+text-align:center;
+padding: 10px 0 30px 0;}
 .container {
   display:flex;
   gap:24px;
@@ -76,3 +79,4 @@ font-weight:700;
   padding-left:12px;
 }
 .missing { color:#b45a00; font-style:italic; background:#fff8e6;}
+
