@@ -39,30 +39,45 @@ function extractCoinFrom(prevLine) {
 
 function parseData() {
   const raw = document.getElementById("inputData").value || "";
-  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+  let lines = raw.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
 
   coinsData = [];
   const tbody = document.querySelector("#resultTable tbody");
   tbody.innerHTML = "";
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (/Zh\/s/i.test(line)) {
-      let numStr = line.replace(/Zh\/s/i, "").trim();
-      numStr = numStr.replace(",", ".");
+  // Eğer tek satır halinde girilmişse regex ile ayır
+  if (lines.length === 1) {
+    const regex = /([A-Za-z0-9]+)\s+([\d.,]+)\s*Zh\/s/gi;
+    let match;
+    while ((match = regex.exec(lines[0])) !== null) {
+      const coin = match[1].toUpperCase();
+      let numStr = match[2].replace(",", ".");
       const num = parseFloat(numStr);
-      if (isNaN(num)) continue;
-
-      let prev = lines[i - 1] || "";
-      let j = i - 1;
-      while (j >= 0 && (/^[^A-Za-z0-9]*$/.test(prev) || /crypto/i.test(prev))) {
-        j--;
-        prev = lines[j] || "";
+      if (!isNaN(num)) {
+        coinsData.push({ coin, value: num * 1_000_000 });
       }
-      const coin = extractCoinFrom(prev);
-      const scaled = num * 1_000_000;
+    }
+  } else {
+    // Mevcut çok satırlı ayrıştırma
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (/Zh\/s/i.test(line)) {
+        let numStr = line.replace(/Zh\/s/i, "").trim();
+        numStr = numStr.replace(",", ".");
+        const num = parseFloat(numStr);
+        if (isNaN(num)) continue;
 
-      coinsData.push({ coin, value: scaled });
+        let prev = lines[i - 1] || "";
+        let j = i - 1;
+        while (j >= 0 && (/^[^A-Za-z0-9]*$/.test(prev) || /crypto/i.test(prev))) {
+          j--;
+          prev = lines[j] || "";
+        }
+        const coin = extractCoinFrom(prev);
+        const scaled = num * 1_000_000;
+
+        coinsData.push({ coin, value: scaled });
+      }
     }
   }
 
@@ -82,6 +97,7 @@ function parseData() {
     tbody.appendChild(tr);
   });
 }
+
 
 function findLeague(userPower) {
   if (isNaN(userPower)) return null;
@@ -170,7 +186,7 @@ async function fetchPricesAndShow() {
     SOL: "solana",
     POL: "polygon-ecosystem-token",
     RLT: "manual_rlt", // CoinGecko’da yok
-    RST: "manual_rst",
+    RST: "manual_rst", 
   };
 
   const validIds = coins.map(c => idMap[c]).filter(id => id !== null);
@@ -184,7 +200,7 @@ async function fetchPricesAndShow() {
   if (coins.includes("RLT")) {
     prices["manual_rlt"] = { usd: 1.0 };
   }
-	if (coins.includes("RST")) {
+if (coins.includes("RST")) {
     prices["manual_rst"] = { usd: 0.011 };
   }
   // yeni tablo oluştur
@@ -225,4 +241,3 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("parseBtn").addEventListener("click", parseData);
   document.getElementById("calcBtn").addEventListener("click", calculateRewards);
 });
-
