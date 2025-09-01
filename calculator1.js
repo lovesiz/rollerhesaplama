@@ -45,28 +45,42 @@ function parseData() {
   const tbody = document.querySelector("#resultTable tbody");
   tbody.innerHTML = "";
 
-  // Eğer tek satır halinde girilmişse regex ile ayır
+  // Ortak ekleme fonksiyonu: ZH için mevcut ölçek 1_000_000 aynen korunur.
+  // EH için 1_000 veriyoruz (ZH, EH'in 1000 katıdır → oran korunur).
+  const pushCoin = (coin, num, unitLetter) => {
+    const unit = (unitLetter || "Z").toUpperCase(); // Z veya E
+    const factor = unit === "Z" ? 1_000_000 : 1_000; // ZH: dokunma, EH: ek
+    coinsData.push({ coin, value: num * factor });
+  };
+
+  // 1) Tek satır halinde verilmişse (ör: "RLT 407.142 Eh/s XRP 179.792 Eh/s ...")
+  //    Coin + sayı + (E|Z)h/s kalıplarını yakala.
   if (lines.length === 1) {
-    const regex = /([A-Za-z0-9]+)\s+([\d.,]+)\s*Zh\/s/gi;
-    let match;
-    while ((match = regex.exec(lines[0])) !== null) {
-      const coin = match[1].toUpperCase();
-      let numStr = match[2].replace(",", ".");
+    const regex = /([A-Za-z0-9]+)\s+([\d.,]+)\s*([ZE])h\/s/gi;
+    let m;
+    while ((m = regex.exec(lines[0])) !== null) {
+      const coin = m[1].toUpperCase().replace(/[^A-Z0-9]/g, "");
+      let numStr = (m[2] || "").replace(",", ".");
       const num = parseFloat(numStr);
-      if (!isNaN(num)) {
-        coinsData.push({ coin, value: num * 1_000_000 });
+      const unitLetter = (m[3] || "Z").toUpperCase();
+      if (coin && !isNaN(num)) {
+        pushCoin(coin, num, unitLetter);
       }
     }
   } else {
-    // Mevcut çok satırlı ayrıştırma
+    // 2) Çok satırlı format: "coin" satırının hemen altındaki değer satırı (Zh/Eh)
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (/Zh\/s/i.test(line)) {
-        let numStr = line.replace(/Zh\/s/i, "").trim();
+
+      // Hem Zh/s hem Eh/s kabul et
+      if (/(Zh|Eh)\/s/i.test(line)) {
+        // Sayıyı çek
+        let numStr = line.replace(/(Zh|Eh)\/s/i, "").trim();
         numStr = numStr.replace(",", ".");
         const num = parseFloat(numStr);
         if (isNaN(num)) continue;
 
+        // Üstteki coin satırını bul (gereksiz/başlık satırlarını atla)
         let prev = lines[i - 1] || "";
         let j = i - 1;
         while (j >= 0 && (/^[^A-Za-z0-9]*$/.test(prev) || /crypto/i.test(prev))) {
@@ -74,9 +88,12 @@ function parseData() {
           prev = lines[j] || "";
         }
         const coin = extractCoinFrom(prev);
-        const scaled = num * 1_000_000;
 
-        coinsData.push({ coin, value: scaled });
+        // Birim harfini (Z/E) yakala
+        const unitMatch = line.match(/([ZE])h\/s/i);
+        const unitLetter = unitMatch ? unitMatch[1].toUpperCase() : "Z";
+
+        pushCoin(coin, num, unitLetter);
       }
     }
   }
@@ -86,6 +103,7 @@ function parseData() {
     return;
   }
 
+  // Ön izleme tablosu
   coinsData.forEach(c => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -241,3 +259,4 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("parseBtn").addEventListener("click", parseData);
   document.getElementById("calcBtn").addEventListener("click", calculateRewards);
 });
+
