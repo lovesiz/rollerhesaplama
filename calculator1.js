@@ -111,6 +111,7 @@ function parseData() {
       <td>${c.value.toLocaleString()}</td>
       <td>—</td>
       <td>-</td>
+      <td>-</td>
     `;
     tbody.appendChild(tr);
   });
@@ -145,7 +146,7 @@ async function calculateRewards() {
     alert("Geçerli bir 'Kendi Gücün' girin.");
     coinsData.forEach(c => {
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${c.coin}</td><td>${c.value.toLocaleString()}</td><td>—</td><td>-</td>`;
+      tr.innerHTML = `<td>${c.coin}</td><td>${c.value.toLocaleString()}</td><td>—</td><td>-</td><td>-</td>`;
       tbody.appendChild(tr);
     });
     return;
@@ -154,7 +155,7 @@ async function calculateRewards() {
   const league = findLeague(userPower);
   const leagueRow = document.createElement("tr");
   leagueRow.classList.add("league-row");
-  leagueRow.innerHTML = `<td colspan="4">Senin Ligin: ${league ? league.name : "Bulunamadı"}</td>`;
+  leagueRow.innerHTML = `<td colspan="5">Senin Ligin: ${league ? league.name : "Bulunamadı"}</td>`;
   tbody.appendChild(leagueRow);
 
   rewardsByCoin = {}; // sıfırla
@@ -163,12 +164,14 @@ async function calculateRewards() {
     const blockReward = league ? getBlockReward(league.name, coin) : null;
     let blockRewardCell = "—";
     let rewardCell = "—";
+    let gunluk = "—";
 
     if (blockReward !== null && !isNaN(Number(blockReward))) {
       let reward = 0;
       if (value > 0) {
         reward = (userPower / value) * Number(blockReward);
         rewardCell = reward.toFixed(8);
+        gunluk = reward * 144;
       }
       blockRewardCell = String(blockReward);
       rewardsByCoin[coin] = reward; // <- burada değişkene atıyoruz
@@ -180,6 +183,7 @@ async function calculateRewards() {
       <td>${value.toLocaleString()}</td>
       <td>${blockRewardCell}</td>
       <td>${rewardCell}</td>
+      <td>${gunluk.toFixed(8)}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -259,4 +263,3 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("parseBtn").addEventListener("click", parseData);
   document.getElementById("calcBtn").addEventListener("click", calculateRewards);
 });
-
