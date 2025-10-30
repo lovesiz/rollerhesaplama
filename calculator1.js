@@ -207,6 +207,7 @@ async function fetchPricesAndShow() {
     TRX: "tron",
     SOL: "solana",
     POL: "polygon-ecosystem-token",
+	ALGO: "algorand",
     RLT: "manual_rlt", // CoinGecko’da yok
     RST: "manual_rst", 
   };
@@ -263,5 +264,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("parseBtn").addEventListener("click", parseData);
   document.getElementById("calcBtn").addEventListener("click", calculateRewards);
 });
+
 
 
