@@ -196,7 +196,6 @@ async function fetchPricesAndShow() {
   const coins = Object.keys(rewardsByCoin);
   if (coins.length === 0) return;
 
-  // CoinGecko ID eşlemesi (gerektiğinde eklenebilir)
   const idMap = {
     BTC: "bitcoin",
     ETH: "ethereum",
@@ -207,9 +206,9 @@ async function fetchPricesAndShow() {
     TRX: "tron",
     SOL: "solana",
     POL: "polygon-ecosystem-token",
-	ALGO: "algorand",
+    ALGO: "algorand",
     RLT: "manual_rlt", // CoinGecko’da yok
-    RST: "manual_rst", 
+    RST: "manual_rst",
   };
 
   const validIds = coins.map(c => idMap[c]).filter(id => id !== null);
@@ -219,19 +218,12 @@ async function fetchPricesAndShow() {
   const res = await fetch(url);
   const prices = await res.json();
 
-// Manuel fiyatlar ekle
-  if (coins.includes("RLT")) {
-    prices["manual_rlt"] = { usd: 1.0 };
-  }
-if (coins.includes("RST")) {
-    prices["manual_rst"] = { usd: 0.009 };
-  }
-  // yeni tablo oluştur
-  let html = `<h3>USD Karşılığı</h3>
-    <table>
-      <thead><tr><th>Coin</th><th>USD Fiyatı</th><th>Blok USD</th><th>Günlük USD</th><th>Haftalık USD</th><th>Aylık USD</th></tr></thead>
-      <tbody>`;
- 
+  // Manuel fiyatlar ekle
+  if (coins.includes("RLT")) prices["manual_rlt"] = { usd: 1.0 };
+  if (coins.includes("RST")) prices["manual_rst"] = { usd: 0.009 };
+
+  // --- HESAPLAMA KISMI ---
+  let results = [];
 
   coins.forEach(c => {
     const reward = rewardsByCoin[c] || 0;
@@ -242,28 +234,58 @@ if (coins.includes("RST")) {
     const total = reward * price;
     const daily = total * 144;
     const weekly = daily * 7;
-    const month  = daily * 30;
+    const month = daily * 30;
+
+    results.push({
+      coin: c,
+      price,
+      total,
+      daily,
+      weekly,
+      month,
+    });
+  });
+
+  // --- SIRALAMA (Aylık USD kazancına göre azalan) ---
+  results.sort((a, b) => b.month - a.month);
+
+  // --- TABLO OLUŞTURMA ---
+  let html = `<h3>USD Karşılığı (Aylık En Yüksekten En Düşüğe)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Coin</th>
+          <th>USD Fiyatı</th>
+          <th>Blok USD</th>
+          <th>Günlük USD</th>
+          <th>Haftalık USD</th>
+          <th>Aylık USD</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  results.forEach(r => {
     html += `<tr>
-      <td>${c}</td>
-      <td>$${price.toLocaleString()}</td>
-      <td>$${total.toFixed(3)}</td>
-	<td>$${daily.toFixed(3)}</td>
-	<td>$${weekly.toFixed(3)}</td>
-	<td>$${month.toFixed(3)}</td>
+      <td>${r.coin}</td>
+      <td>$${r.price.toLocaleString()}</td>
+      <td>$${r.total.toFixed(3)}</td>
+      <td>$${r.daily.toFixed(3)}</td>
+      <td>$${r.weekly.toFixed(3)}</td>
+      <td>$${r.month.toFixed(3)}</td>
     </tr>`;
   });
 
   html += `</tbody></table>`;
-
-  // Yeni div eklemek yerine var olan tabloyu güncelle
   document.getElementById("usdTable").innerHTML = html;
 }
+
 
 // event listeners
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("parseBtn").addEventListener("click", parseData);
   document.getElementById("calcBtn").addEventListener("click", calculateRewards);
 });
+
 
 
 
