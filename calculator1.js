@@ -221,7 +221,7 @@ async function fetchPricesAndShow() {
 
   // Manuel fiyatlar ekle
   if (coins.includes("RLT")) prices["manual_rlt"] = { usd: 1.0 };
-  if (coins.includes("RST")) prices["manual_rst"] = { usd: 0.009 };
+  if (coins.includes("RST")) prices["manual_rst"] = { usd: 0.008 };
   if (coins.includes("HMT")) prices["manual_hmt"] = { usd: 0 };
 
   // --- HESAPLAMA KISMI ---
@@ -287,6 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("parseBtn").addEventListener("click", parseData);
   document.getElementById("calcBtn").addEventListener("click", calculateRewards);
 });
+
 
 
 
