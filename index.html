@@ -4,16 +4,16 @@
   <meta charset="utf-8" />
   <title>Rollercoin Kazanç Hesaplama | Mining Gelirinizi Öğrenin</title>
   <link rel="stylesheet" href="style.css" />
-	<meta name="description" content="Rollercoin kazanç hesaplama aracımız ile ne kadar gelir elde edebileceğinizi hemen öğrenin. Güncel verilerle mining gücünüzü hesaplayın ve kazanç potansiyelinizi görün." />
+  <meta name="description" content="Rollercoin kazanç hesaplama aracımız ile ne kadar gelir elde edebileceğinizi hemen öğrenin. Güncel verilerle mining gücünüzü hesaplayın ve kazanç potansiyelinizi görün." />
 </head>
 <body>
 
-	<div id="frame" style="width: 728px;margin: auto;z-index: 99998;height: auto">
-          <iframe data-aa='2408571' src='//ad.a-ads.com/2408571/?size=728x90'
-                            style='border:0; padding:0; width:728px; height:90px; overflow:hidden;display: block;margin: auto'></iframe>
-        </div>
-  <div class="container">
+  <div id="frame" style="width: 728px;margin: auto;z-index: 99998;height: auto">
+    <iframe data-aa='2408571' src='//ad.a-ads.com/2408571/?size=728x90'
+            style='border:0; padding:0; width:728px; height:90px; overflow:hidden;display: block;margin: auto'></iframe>
+  </div>
 
+  <div class="container">
     <div class="left">
       <h2>Veri Girişi</h2>
       <textarea id="inputData" placeholder='Örnek format:
@@ -27,6 +27,25 @@ xrp
 2.555 Zh/s
 '></textarea>
 
+      <label for="leagueSelect"><strong>Liginizi Seçin</strong></label>
+      <select id="leagueSelect" style="width:100%; padding:10px; border-radius:8px; border:1px solid #dde6ef; margin-bottom:12px; background: #fff; cursor: pointer;">
+        <option value="Bronze I">Bronze I</option>
+        <option value="Bronze II">Bronze II</option>
+        <option value="Bronze III">Bronze III</option>
+        <option value="Silver I">Silver I</option>
+        <option value="Silver II">Silver II</option>
+        <option value="Silver III">Silver III</option>
+        <option value="Gold I">Gold I</option>
+        <option value="Gold II">Gold II</option>
+        <option value="Gold III">Gold III</option>
+        <option value="Platinum I">Platinum I</option>
+        <option value="Platinum II">Platinum II</option>
+        <option value="Platinum III">Platinum III</option>
+        <option value="Diamond I">Diamond I</option>
+        <option value="Diamond II">Diamond II</option>
+        <option value="Diamond III">Diamond III</option>
+      </select>
+
       <label for="userPower"><strong>Kendi Gücün (birim: senin girdin)</strong></label>
       <input id="userPower" placeholder="Örn: 5.0" />
 
@@ -34,9 +53,10 @@ xrp
         <button id="parseBtn">Tabloya Dönüştür</button>
         <button id="calcBtn">Hesapla</button>
       </div>
-	<div class="resim"><img src="image/asd.PNG" alt=""></div>
-	<div class="resim"><img src="image/1.PNG" alt=""></div>
-      <p class="note">Hesaplama için öncelikle resimdeki gibi tüm coinleri kopyalayıp Veri Girişi kısmına yapıştırıp Tabloya Dönüştür Butonuna tıklayın. Daha sonra Kendi Gücünüzü yazarak Hesapla Butonuna Tıklayın. Örneğin Gücünüz 22.250 EH ise 22250 Yazın. Gücünüz 950 PH ise 950 Yazın </p>
+
+      <div class="resim"><img src="image/asd.PNG" alt=""></div>
+      <div class="resim"><img src="image/1.PNG" alt=""></div>
+      <p class="note">Hesaplama için öncelikle tüm coinleri kopyalayıp Veri Girişi kısmına yapıştırın ve <b>Tabloya Dönüştür</b> butonuna tıklayın. Ardından <b>Liginizi seçin</b>, gücünüzü yazın ve <b>Hesapla</b> butonuna tıklayın.</p>
     </div>
 
     <div class="right">
@@ -46,28 +66,19 @@ xrp
           <tr>
             <th>Coin</th>
             <th>Toplam Güç (ölçeklenmiş)</th>
-            <th>Kullanılan Blok Ödülü (lig→coin)</th>
-            <th>Senin Ödülün (blok başı)</th>
+            <th>Blok Ödülü</th>
+            <th>Senin Ödülün (blok)</th>
             <th>Günlük Coin</th>
             <th>Çekim Günü</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
-<!-- USD karşılığı tablosu buraya yazdırılacak -->
       <div id="usdTable"></div>
     </div>
   </div>
 
-  <!-- Önce blok ödüllerini yükle -->
   <script src="blockRewards.js"></script>
-
-  <!-- Sonra hesaplama/parsing kodu -->
   <script src="calculator1.js"></script>
 </body>
 </html>
-
-
-
-
-
