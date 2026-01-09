@@ -7,8 +7,9 @@ const withdrawLimits = {
   XRP: 40,
   TRX: 300,
   BNB: 0.06,
-  POL: 80,
+  POL: 300,
   SOL: 0.6,
+  LTC: 5,
 };
 
 let coinsData = [];
@@ -205,4 +206,5 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("parseBtn").addEventListener("click", parseData);
   document.getElementById("calcBtn").addEventListener("click", calculateRewards);
 });
+
 
