@@ -163,7 +163,7 @@ async function fetchPricesAndShow() {
     BTC: "bitcoin", ETH: "ethereum", BNB: "binancecoin", LTC: "litecoin",
     DOGE: "dogecoin", XRP: "ripple", TRX: "tron", SOL: "solana",
     POL: "polygon-ecosystem-token", ALGO: "algorand", RLT: "manual_rlt",
-    RST: "manual_rst", HMT: "manual_hmt",
+    RST: "manual_rst", HMT: "manual_hmt", USDT: "manual_usdt",
   };
 
   const validIds = coins.map(c => idMap[c]).filter(id => id !== null);
@@ -176,6 +176,7 @@ async function fetchPricesAndShow() {
     if (coins.includes("RLT")) prices["manual_rlt"] = { usd: 1.0 };
     if (coins.includes("RST")) prices["manual_rst"] = { usd: 0.0059 };
     if (coins.includes("HMT")) prices["manual_hmt"] = { usd: 0 };
+    if (coins.includes("USDT")) prices["manual_usdt"] = { usd: 1.0 };
 
     let results = [];
     coins.forEach(c => {
@@ -206,5 +207,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("parseBtn").addEventListener("click", parseData);
   document.getElementById("calcBtn").addEventListener("click", calculateRewards);
 });
+
 
 
