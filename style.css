@@ -11,6 +11,10 @@ body {
   gap:24px;
   align-items:flex-start;
 }
+.reklam{
+	text-align:center;
+padding: 10px 0 30px 0;
+}
 #frame{
 text-align:center;
 padding: 10px 0 30px 0;}
