@@ -56,6 +56,9 @@ button {
   font-weight:600;
 }
 button:hover { opacity:0.95; }
+img{
+	max-width:350px;
+}
 .resim{
   max-width:350px;
 margin:5px 0 0 10px;
