@@ -57,6 +57,7 @@ button {
 }
 button:hover { opacity:0.95; }
 .resim{
+  width:350px;
 margin:5px 0 0 10px;
 }
 .note { font-size:15px; color:#666; margin-top:10px; line-height:1.4;}
