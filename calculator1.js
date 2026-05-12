@@ -1,4 +1,6 @@
-/* calculator1.js */
+/* =========================================
+   calculator1.js
+========================================= */
 
 const withdrawLimits = {
   BTC: 0.00085,
@@ -16,11 +18,15 @@ let coinsData = [];
 let rewardsByCoin = {};
 
 /* =========================================
-   YENİ VERİ FORMATINI AYIKLAMA
+   VERİ AYIKLAMA
+   Artık block reward dış dosyadan değil
+   kullanıcının yapıştırdığı metinden alınır
 ========================================= */
 
 function parseData() {
-  const raw = document.getElementById("inputData").value || "";
+
+  const raw =
+    document.getElementById("inputData").value || "";
 
   let lines = raw
     .split(/\r?\n/)
@@ -29,15 +35,21 @@ function parseData() {
 
   coinsData = [];
 
-  const tbody = document.querySelector("#resultTable tbody");
+  const tbody =
+    document.querySelector("#resultTable tbody");
+
   tbody.innerHTML = "";
 
   let currentCoin = null;
 
   for (let i = 0; i < lines.length; i++) {
+
     const line = lines[i];
 
-    // Coin kodunu yakala
+    /* =========================
+       COIN BUL
+    ========================= */
+
     if (
       /^[A-Z0-9]{2,10}$/.test(line) &&
       ![
@@ -54,45 +66,122 @@ function parseData() {
       currentCoin = line.toUpperCase();
     }
 
-    // Power alanını yakala
-    if (line.toLowerCase() === "power" && currentCoin) {
+    /* =========================
+       POWER BUL
+    ========================= */
+
+    if (
+      line.toLowerCase() === "power" &&
+      currentCoin
+    ) {
+
       const powerLine = lines[i + 1] || "";
 
-      const powerMatch = powerLine.match(/([\d.,]+)\s*([ZE])h\/s/i);
+      const powerMatch =
+        powerLine.match(
+          /([\d.,]+)\s*([ZE])h\/s/i
+        );
 
-      if (powerMatch) {
-        let num = parseFloat(powerMatch[1].replace(",", "."));
-        const unit = powerMatch[2].toUpperCase();
+      if (!powerMatch) continue;
 
-        // Zh => milyon
-        // Eh => bin
-        const factor = unit === "Z" ? 1_000_000 : 1_000;
+      let power =
+        parseFloat(
+          powerMatch[1].replace(",", ".")
+        );
 
-        coinsData.push({
-          coin: currentCoin,
-          value: num * factor
-        });
+      const unit =
+        powerMatch[2].toUpperCase();
+
+      // Zh => milyon
+      // Eh => bin
+
+      const factor =
+        unit === "Z"
+          ? 1_000_000
+          : 1_000;
+
+      power = power * factor;
+
+      /* =========================
+         PER BLOCK BUL
+      ========================= */
+
+      let blockReward = null;
+
+      for (let j = i; j < i + 10; j++) {
+
+        const testLine = lines[j] || "";
+
+        if (
+          testLine.toLowerCase() === "per block"
+        ) {
+
+          const rewardLine =
+            lines[j + 1] || "";
+
+          const rewardMatch =
+            rewardLine.match(
+              /([\d.,]+)\s+[A-Z0-9]+/i
+            );
+
+          if (rewardMatch) {
+
+            blockReward =
+              parseFloat(
+                rewardMatch[1]
+                  .replace(",", ".")
+              );
+          }
+
+          break;
+        }
       }
+
+      coinsData.push({
+        coin: currentCoin,
+        value: power,
+        blockReward: blockReward
+      });
     }
   }
 
+  /* =========================
+     VERİ YOK
+  ========================= */
+
   if (coinsData.length === 0) {
+
     tbody.innerHTML = `
       <tr>
-        <td colspan="6">Ayrıştırılacak veri bulunamadı.</td>
+        <td colspan="6">
+          Ayrıştırılacak veri bulunamadı.
+        </td>
       </tr>
     `;
+
     return;
   }
 
-  // TABLOYA YAZ
+  /* =========================
+     TABLOYA YAZ
+  ========================= */
+
   coinsData.forEach(c => {
-    const tr = document.createElement("tr");
+
+    const tr =
+      document.createElement("tr");
 
     tr.innerHTML = `
       <td>${c.coin}</td>
-      <td>${c.value.toLocaleString()}</td>
-      <td>—</td>
+
+      <td>
+        ${c.value.toLocaleString()}
+      </td>
+
+      <td>
+        ${c.blockReward ?? "-"}
+      </td>
+
       <td>-</td>
       <td>-</td>
       <td>-</td>
@@ -103,43 +192,30 @@ function parseData() {
 }
 
 /* =========================================
-   BLOCK REWARD
-========================================= */
-
-function getBlockReward(leagueName, coin) {
-  if (typeof BLOCK_REWARDS_BY_LEAGUE === "undefined") return null;
-
-  const leagueObj = BLOCK_REWARDS_BY_LEAGUE[leagueName];
-
-  if (!leagueObj) return null;
-
-  return (leagueObj[coin] !== undefined)
-    ? leagueObj[coin]
-    : null;
-}
-
-/* =========================================
    HESAPLAMA
 ========================================= */
 
 async function calculateRewards() {
 
-  const userPowerRaw = (
-    document.getElementById("userPower").value || ""
-  )
-    .trim()
-    .replace(",", ".");
+  const userPowerRaw =
+    (
+      document.getElementById("userPower").value || ""
+    )
+      .trim()
+      .replace(",", ".");
 
-  const userPower = parseFloat(userPowerRaw);
+  const userPower =
+    parseFloat(userPowerRaw);
 
-  // Lig seçimi
-  const selectedLeague =
-    document.getElementById("leagueSelect").value;
+  const tbody =
+    document.querySelector("#resultTable tbody");
 
-  const tbody = document.querySelector("#resultTable tbody");
   tbody.innerHTML = "";
 
-  if (!coinsData || coinsData.length === 0) {
+  if (
+    !coinsData ||
+    coinsData.length === 0
+  ) {
 
     tbody.innerHTML = `
       <tr>
@@ -152,94 +228,117 @@ async function calculateRewards() {
     return;
   }
 
-  if (isNaN(userPower) || userPower <= 0) {
-    alert("Geçerli bir 'Kendi Gücün' girin.");
+  if (
+    isNaN(userPower) ||
+    userPower <= 0
+  ) {
+
+    alert(
+      "Geçerli bir 'Kendi Gücün' girin."
+    );
+
     return;
   }
 
-  const leagueRow = document.createElement("tr");
-
-  leagueRow.classList.add("league-row");
-
-  leagueRow.innerHTML = `
-    <td colspan="6">
-      Hesaplanan Lig: ${selectedLeague}
-    </td>
-  `;
-
-  tbody.appendChild(leagueRow);
-
   rewardsByCoin = {};
 
-  coinsData.forEach(({ coin, value }) => {
+  coinsData.forEach(
+    ({
+      coin,
+      value,
+      blockReward
+    }) => {
 
-    const blockReward =
-      getBlockReward(selectedLeague, coin);
+      let rewardCell = "—";
+      let gunluk = 0;
+      let cekimgun = "—";
 
-    let blockRewardCell = "—";
-    let rewardCell = "—";
-    let gunluk = 0;
-    let cekimgun = "—";
-
-    if (
-      blockReward !== null &&
-      !isNaN(Number(blockReward))
-    ) {
-
-      let reward =
-        (userPower / value) * Number(blockReward);
-
-      rewardCell = reward.toFixed(8);
-
-      gunluk = reward * 144;
-
-      // Çekim süresi
       if (
-        withdrawLimits[coin] &&
-        gunluk > 0
+        blockReward !== null &&
+        !isNaN(blockReward)
       ) {
 
-        const daysNeeded =
-          withdrawLimits[coin] / gunluk;
+        // BLOK BAŞI KAZANÇ
 
-        const d = Math.floor(daysNeeded);
+        let reward =
+          (userPower / value) *
+          blockReward;
 
-        const h = Math.round(
-          (daysNeeded - d) * 24
-        );
+        rewardCell =
+          reward.toFixed(8);
 
-        cekimgun = `${d}g ${h}s`;
+        // GÜNLÜK
+
+        gunluk = reward * 144;
+
+        // ÇEKİM GÜNÜ
+
+        if (
+          withdrawLimits[coin] &&
+          gunluk > 0
+        ) {
+
+          const daysNeeded =
+            withdrawLimits[coin] /
+            gunluk;
+
+          const d =
+            Math.floor(daysNeeded);
+
+          const h =
+            Math.round(
+              (daysNeeded - d) * 24
+            );
+
+          cekimgun =
+            `${d}g ${h}s`;
+        }
+
+        rewardsByCoin[coin] = reward;
       }
 
-      blockRewardCell = String(blockReward);
+      const tr =
+        document.createElement("tr");
 
-      rewardsByCoin[coin] = reward;
+      tr.innerHTML = `
+        <td>${coin}</td>
+
+        <td>
+          ${value.toLocaleString()}
+        </td>
+
+        <td>
+          ${blockReward ?? "-"}
+        </td>
+
+        <td>
+          ${rewardCell}
+        </td>
+
+        <td>
+          ${gunluk.toFixed(8)}
+        </td>
+
+        <td>
+          ${cekimgun}
+        </td>
+      `;
+
+      tbody.appendChild(tr);
     }
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${coin}</td>
-      <td>${value.toLocaleString()}</td>
-      <td>${blockRewardCell}</td>
-      <td>${rewardCell}</td>
-      <td>${gunluk.toFixed(8)}</td>
-      <td>${cekimgun}</td>
-    `;
-
-    tbody.appendChild(tr);
-  });
+  );
 
   await fetchPricesAndShow();
 }
 
 /* =========================================
-   USD FİYATLARI
+   USD TABLOSU
 ========================================= */
 
 async function fetchPricesAndShow() {
 
-  const coins = Object.keys(rewardsByCoin);
+  const coins =
+    Object.keys(rewardsByCoin);
 
   if (coins.length === 0) return;
 
@@ -260,51 +359,71 @@ async function fetchPricesAndShow() {
     USDT: "manual_usdt",
   };
 
-  const validIds = coins
-    .map(c => idMap[c])
-    .filter(id => id !== null);
+  const validIds =
+    coins
+      .map(c => idMap[c])
+      .filter(id => id !== null);
 
   const url =
     `https://api.coingecko.com/api/v3/simple/price?ids=${validIds.join(",")}&vs_currencies=usd`;
 
   try {
 
-    const res = await fetch(url);
+    const res =
+      await fetch(url);
 
-    const prices = await res.json();
+    const prices =
+      await res.json();
 
-    // Manuel coin fiyatları
+    // Manuel fiyatlar
+
     if (coins.includes("RLT")) {
-      prices["manual_rlt"] = { usd: 1.0 };
+      prices["manual_rlt"] = {
+        usd: 1.0
+      };
     }
 
     if (coins.includes("RST")) {
-      prices["manual_rst"] = { usd: 0.0059 };
+      prices["manual_rst"] = {
+        usd: 0.0059
+      };
     }
 
     if (coins.includes("HMT")) {
-      prices["manual_hmt"] = { usd: 0 };
+      prices["manual_hmt"] = {
+        usd: 0
+      };
     }
 
     if (coins.includes("USDT")) {
-      prices["manual_usdt"] = { usd: 1.0 };
+      prices["manual_usdt"] = {
+        usd: 1.0
+      };
     }
 
     let results = [];
 
     coins.forEach(c => {
 
-      const reward = rewardsByCoin[c] || 0;
+      const reward =
+        rewardsByCoin[c] || 0;
 
-      const id = idMap[c];
+      const id =
+        idMap[c];
 
-      if (!id || !prices[id]) return;
+      if (
+        !id ||
+        !prices[id]
+      ) return;
 
-      const price = prices[id].usd;
+      const price =
+        prices[id].usd;
 
-      const total = reward * price;
+      const total =
+        reward * price;
 
-      const daily = total * 144;
+      const daily =
+        total * 144;
 
       results.push({
         coin: c,
@@ -316,13 +435,16 @@ async function fetchPricesAndShow() {
       });
     });
 
-    // Aylık kazanca göre sırala
-    results.sort((a, b) => b.month - a.month);
+    // AYLIK SIRALA
+
+    results.sort(
+      (a, b) =>
+        b.month - a.month
+    );
 
     let html = `
       <h3>
         USD Karşılığı
-        (Aylık En Yüksekten En Düşüğe)
       </h3>
 
       <table>
@@ -330,11 +452,11 @@ async function fetchPricesAndShow() {
       <thead>
         <tr>
           <th>Coin</th>
-          <th>USD Fiyatı</th>
-          <th>Blok USD</th>
-          <th>Günlük USD</th>
-          <th>Haftalık USD</th>
-          <th>Aylık USD</th>
+          <th>USD</th>
+          <th>Blok</th>
+          <th>Günlük</th>
+          <th>Haftalık</th>
+          <th>Aylık</th>
         </tr>
       </thead>
 
@@ -345,27 +467,31 @@ async function fetchPricesAndShow() {
 
       html += `
         <tr>
-          <td>${r.coin}</td>
+
+          <td>
+            ${r.coin}
+          </td>
 
           <td>
             $${r.price.toLocaleString()}
           </td>
 
           <td>
-            $${r.total.toFixed(3)}
+            $${r.total.toFixed(4)}
           </td>
 
           <td>
-            $${r.daily.toFixed(3)}
+            $${r.daily.toFixed(4)}
           </td>
 
           <td>
-            $${r.weekly.toFixed(3)}
+            $${r.weekly.toFixed(4)}
           </td>
 
           <td>
-            $${r.month.toFixed(3)}
+            $${r.month.toFixed(4)}
           </td>
+
         </tr>
       `;
     });
@@ -375,25 +501,39 @@ async function fetchPricesAndShow() {
       </table>
     `;
 
-    document.getElementById("usdTable").innerHTML = html;
+    document.getElementById(
+      "usdTable"
+    ).innerHTML = html;
 
   } catch (e) {
 
-    console.error("Fiyatlar çekilemedi", e);
+    console.error(
+      "Fiyatlar çekilemedi",
+      e
+    );
   }
 }
 
 /* =========================================
-   EVENTS
+   EVENTLER
 ========================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
 
-  document
-    .getElementById("parseBtn")
-    .addEventListener("click", parseData);
+    document
+      .getElementById("parseBtn")
+      .addEventListener(
+        "click",
+        parseData
+      );
 
-  document
-    .getElementById("calcBtn")
-    .addEventListener("click", calculateRewards);
-});
+    document
+      .getElementById("calcBtn")
+      .addEventListener(
+        "click",
+        calculateRewards
+      );
+  }
+);
